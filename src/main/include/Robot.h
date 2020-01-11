@@ -30,12 +30,12 @@ class Robot : public frc::TimedRobot, public PIDOutput {
   void TeleopPeriodic() override;
   void TestPeriodic() override;
 
+  void PIDWrite(double output) {
+    rotateToAngleRate = output;
+  }
+
   void RotateToAngle(double targetAngle, double currentAngle);
   void DreadbotTankDrive();
-
-  void PIDWrite(float output) {
-        rotateToAngleRate = output;
-  }
 
  private:
   frc::SendableChooser<std::string> m_chooser;
@@ -52,7 +52,7 @@ class Robot : public frc::TimedRobot, public PIDOutput {
   const double kF = 0.00f;
   const double kToleranceDegrees = 2.0f;
 
-  double rotateToAngleRate;
+  double rotateToAngleRate = 0.0;
 
   // JOYSTICK INPUTS
   frc::Joystick *js1;
