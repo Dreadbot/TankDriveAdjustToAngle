@@ -15,10 +15,12 @@
 
 #include <ctre/Phoenix.h>
 
-#include "AHRS.h"
-#include <frc/PIDController.h>
+#include <AHRS.h>
 
-class Robot : public frc::TimedRobot {
+#include <frc/PIDController.h>
+#include <frc/PIDOutput.h>
+
+class Robot : public frc::TimedRobot, public PIDOutput {
  public:
   void RobotInit() override;
   void RobotPeriodic() override;
@@ -28,8 +30,12 @@ class Robot : public frc::TimedRobot {
   void TeleopPeriodic() override;
   void TestPeriodic() override;
 
-  void RotateToAngle(int targetAngle);
+  void RotateToAngle(double targetAngle, double currentAngle);
   void DreadbotTankDrive();
+
+  void PIDWrite(float output) {
+        rotateToAngleRate = output;
+  }
 
  private:
   frc::SendableChooser<std::string> m_chooser;
@@ -46,6 +52,8 @@ class Robot : public frc::TimedRobot {
   const double kF = 0.00f;
   const double kToleranceDegrees = 2.0f;
 
+  double rotateToAngleRate;
+
   // JOYSTICK INPUTS
   frc::Joystick *js1;
 
@@ -57,7 +65,7 @@ class Robot : public frc::TimedRobot {
   WPI_TalonSRX *r2;
 
   AHRS *ahrs; 
-  PIDController *turnController;
+  frc::PIDController *turnController;
 
   double yAxis;
   double rotAxis;

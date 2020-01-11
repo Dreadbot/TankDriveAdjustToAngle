@@ -29,7 +29,7 @@ void Robot::RobotInit() {
 
   ahrs = new AHRS(SPI::Port::kMXP);
 
-  turnController = new PIDController(kP, kI, kD, kF, ahrs, this)
+  turnController = new frc::PIDController(kP, kI, kD, kF, ahrs, this, 0.05);
   turnController->SetInputRange(-180.0f,  180.0f);
   turnController->SetOutputRange(-1.0, 1.0);
   turnController->SetAbsoluteTolerance(kToleranceDegrees);
@@ -67,19 +67,19 @@ void Robot::DreadbotTankDrive() {
 
 void Robot::RotateToAngle(double targetAngle, double currentAngle){ //angle is -180 to 180
   bool rotateToAngle = false;
-  if ( js1.GetRawButton(2)) {
+  if ( js1->GetRawButton(2)) {
     turnController->SetSetpoint(0.0f);
     rotateToAngle = true;
   } 
-  else if ( js1.GetRawButton(3)) {
+  else if ( js1->GetRawButton(3)) {
     turnController->SetSetpoint(90.0f);
     rotateToAngle = true;
   }
-  else if ( js1.GetRawButton(4)) {
+  else if ( js1->GetRawButton(4)) {
     turnController->SetSetpoint(179.9f);
     rotateToAngle = true;
   } 
-  else if ( js1.GetRawButton(5)) {
+  else if ( js1->GetRawButton(5)) {
     turnController->SetSetpoint(-90.0f);
     rotateToAngle = true;
   }
@@ -91,7 +91,7 @@ void Robot::RotateToAngle(double targetAngle, double currentAngle){ //angle is -
   } 
   else {
     turnController->Disable();
-    currentRotationRate = stick.GetTwist();
+    currentRotationRate = js1->GetTwist();
   }
 }
 
