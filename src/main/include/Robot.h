@@ -76,8 +76,10 @@ private:
   WPI_TalonSRX *right_motor_1;
   WPI_TalonSRX *right_motor_2;
 
-  // ROBOT GYRO OBJECTS
-  AHRS *ahrs; 
+  // ROBOT GYRO OBJECTS/VARIABLES
+  AHRS *ahrs;
+
+  double const kCardinalDegrees[4] = {0.0, 90.0, 179.9, -90.0};
 
   // PID OBJECTS
   frc::PIDController *turn_controller;

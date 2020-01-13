@@ -73,19 +73,19 @@ void Robot::RotateToAngle(double targetAngle, double currentAngle){ //angle is -
   
   bool rotateToAngle = false;
   if ( joystick_1->GetRawButton(2)) {
-    turn_controller->SetSetpoint(0.0f);
+    turn_controller->SetSetpoint(kCardinalDegrees[0]);
     rotateToAngle = true;
   } 
   else if ( joystick_1->GetRawButton(3)) {
-    turn_controller->SetSetpoint(90.0f);
+    turn_controller->SetSetpoint(kCardinalDegrees[1]);
     rotateToAngle = true;
   }
   else if ( joystick_1->GetRawButton(4)) {
-    turn_controller->SetSetpoint(179.9f);
+    turn_controller->SetSetpoint(kCardinalDegrees[2]);
     rotateToAngle = true;
   } 
   else if ( joystick_1->GetRawButton(5)) {
-    turn_controller->SetSetpoint(-90.0f);
+    turn_controller->SetSetpoint(kCardinalDegrees[3]);
     rotateToAngle = true;
   }
 
@@ -134,13 +134,13 @@ void Robot::TeleopPeriodic() {
   // Check buttons to rotate to angle.
   // Inherently Overrides DreadBotTankDrive function.
   if(joystick_1->GetRawButton(a_button)) {
-    RotateToAngle(0.0, ahrs->GetAngle());
+    RotateToAngle(kCardinalDegrees[0], ahrs->GetAngle());
   } else if(joystick_1->GetRawButton(b_button)) {
-    RotateToAngle(90.0, ahrs->GetAngle());
+    RotateToAngle(kCardinalDegrees[1], ahrs->GetAngle());
   } else if(joystick_1->GetRawButton(y_button)) {
-    RotateToAngle(180.0, ahrs->GetAngle());
+    RotateToAngle(kCardinalDegrees[2], ahrs->GetAngle());
   } else if(joystick_1->GetRawButton(x_button)) {
-    RotateToAngle(-90.0, ahrs->GetAngle());
+    RotateToAngle(kCardinalDegrees[3], ahrs->GetAngle());
   }
 }
 
