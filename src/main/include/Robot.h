@@ -5,23 +5,31 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
+#ifndef DREADBOTTANKDRIVE_INCLUDE_ROBOT_H_
+#define DREADBOTTANKDRIVE_INCLUDE_ROBOT_H_
+
 #pragma once
 
+#include <iostream>
 #include <string>
-
-#include <frc/TimedRobot.h>
-#include <frc/smartdashboard/SendableChooser.h>
-#include <frc/Joystick.h>
-
-#include <ctre/Phoenix.h>
 
 #include <AHRS.h>
 
+#include <ctre/Phoenix.h>
+
+#include <frc/Joystick.h>
 #include <frc/PIDController.h>
 #include <frc/PIDOutput.h>
+#include <frc/smartdashboard/SmartDashboard.h>
+#include <frc/smartdashboard/SendableChooser.h>
+#include <frc/TimedRobot.h>
+
+#include "RobotUtilities.h"
+
+#endif // DREADBOTTANKDRIVE_INCLUDE_ROBOT_H_
 
 class Robot : public frc::TimedRobot, public PIDOutput {
- public:
+public:
   void RobotInit() override;
   void RobotPeriodic() override;
   void AutonomousInit() override;
@@ -35,9 +43,9 @@ class Robot : public frc::TimedRobot, public PIDOutput {
   }
 
   void RotateToAngle(double targetAngle, double currentAngle);
-  void DreadbotTankDrive();
+  void DreadbotTankDrive(double yAxis, double rotAxis);
 
- private:
+private:
   frc::SendableChooser<std::string> m_chooser;
   const std::string kAutoNameDefault = "Default";
   const std::string kAutoNameCustom = "My Auto";
@@ -66,9 +74,6 @@ class Robot : public frc::TimedRobot, public PIDOutput {
 
   AHRS *ahrs; 
   frc::PIDController *turnController;
-
-  double yAxis;
-  double rotAxis;
   
   double ySpeed;
   double rotSpeed;
