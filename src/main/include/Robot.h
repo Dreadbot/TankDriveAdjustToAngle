@@ -39,45 +39,53 @@ public:
   void TestPeriodic() override;
 
   void PIDWrite(double output) {
-    rotateToAngleRate = output;
+    rotate_to_angle_rate = output;
   }
 
-  void RotateToAngle(double targetAngle, double currentAngle);
-  void DreadbotTankDrive(double yAxis, double rotAxis);
+  void RotateToAngle(double target_angle, double current_angle);
+  void DreadbotTankDrive(double y_axis, double rot_axis);
 
 private:
+  // SMARTDASHBOARD VARIABLES/CONSTANTS
   frc::SendableChooser<std::string> m_chooser;
   const std::string kAutoNameDefault = "Default";
   const std::string kAutoNameCustom = "My Auto";
   std::string m_autoSelected;
 
-  const double joystickDeadband = 0.2;
-  const double speed = 0.4;
+  // TANK DRIVE CONSTANTS
+  const double kJoystickDeadband = 0.2;
+  const double kSpeed = 0.4;
 
+  // PID CONSTANTS
   const double kP = 0.03f;
   const double kI = 0.00f;
   const double kD = 0.00f;
   const double kF = 0.00f;
   const double kToleranceDegrees = 2.0f;
 
-  double rotateToAngleRate = 0.0;
+  // PID VARIABLES
+  double rotate_to_angle_rate = 0.0;
 
-  // JOYSTICK INPUTS
-  frc::Joystick *js1;
+  // JOYSTICK INPUT OBJECTS
+  frc::Joystick *joystick_1;
 
-  // MOTORS
-  WPI_TalonSRX *l1;
-  WPI_TalonSRX *l2;
+  // MOTOR OBJECTS
+  WPI_TalonSRX *left_motor_1;
+  WPI_TalonSRX *left_motor_2;
 
-  WPI_TalonSRX *r1;
-  WPI_TalonSRX *r2;
+  WPI_TalonSRX *right_motor_1;
+  WPI_TalonSRX *right_motor_2;
 
+  // ROBOT GYRO OBJECTS
   AHRS *ahrs; 
-  frc::PIDController *turnController;
-  
-  double ySpeed;
-  double rotSpeed;
 
-  double lFinalSpeed;
-  double rFinalSpeed;
+  // PID OBJECTS
+  frc::PIDController *turn_controller;
+  
+  // TANK DRIVE VARIABLES
+  double y_speed;
+  double rot_speed;
+
+  double left_final_speed;
+  double right_final_speed;
 };

@@ -14,57 +14,57 @@ void Robot::RobotInit() {
   frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
 
   // Input Device Objects
-  js1 = new frc::Joystick(0);
+  joystick_1 = new frc::Joystick(0);
 
   // Robot Motor Objects
-  l1 = new WPI_TalonSRX(1);
-  l2 = new WPI_TalonSRX(4);
+  left_motor_1 = new WPI_TalonSRX(1);
+  left_motor_2 = new WPI_TalonSRX(4);
 
-  r1 = new WPI_TalonSRX(2);
-  r2 = new WPI_TalonSRX(6);
+  right_motor_1 = new WPI_TalonSRX(2);
+  right_motor_2 = new WPI_TalonSRX(6);
 
   // Robot Gyroscope Objects
   ahrs = new AHRS(SPI::Port::kMXP);
 
   // PID Controller Object Setup
-  turnController = new frc::PIDController(kP, kI, kD, kF, ahrs, this, 0.05);
-  turnController->SetInputRange(-180.0f,  180.0f);
-  turnController->SetOutputRange(-1.0, 1.0);
-  turnController->SetAbsoluteTolerance(kToleranceDegrees);
-  turnController->SetContinuous(true);
+  turn_controller = new frc::PIDController(kP, kI, kD, kF, ahrs, this, 0.05);
+  turn_controller->SetInputRange(-180.0f,  180.0f);
+  turn_controller->SetOutputRange(-1.0, 1.0);
+  turn_controller->SetAbsoluteTolerance(kToleranceDegrees);
+  turn_controller->SetContinuous(true);
 }
 
 void Robot::DreadbotTankDrive(double yAxis, double rotAxis) {
   // Account for Joystick Deadband
-  if(fabs(yAxis) < joystickDeadband) {
+  if(fabs(yAxis) < kJoystickDeadband) {
     yAxis = 0.0;
   }
 
-  if(fabs(rotAxis) < joystickDeadband) {
+  if(fabs(rotAxis) < kJoystickDeadband) {
     rotAxis = 0.0;
   }
 
   // Flipping Variables to change behavior for rotation.
   if(fabs(rotAxis) > 0.0) {
-    rotSpeed = -rotSpeed;
+    rot_speed = -rot_speed;
   }
 
   // Multiply Intended Velocity by a cap speed.
   // (See main.include.Robot.h)
-  ySpeed = yAxis * speed;
-  rotSpeed = rotAxis * speed;
+  y_speed = yAxis * kSpeed;
+  rot_speed = rotAxis * kSpeed;
 
   // Calculating Final Speed
   // by Adding the Rotation Factor
-  lFinalSpeed = ySpeed + -rotSpeed;
-  rFinalSpeed = ySpeed + rotSpeed;
+  left_final_speed = y_speed + -rot_speed;
+  right_final_speed = y_speed + rot_speed;
 
   // Set Motor Values
-  l1->Set(ControlMode::PercentOutput, lFinalSpeed);
-  l2->Set(ControlMode::PercentOutput, lFinalSpeed);
+  left_motor_1->Set(ControlMode::PercentOutput, left_final_speed);
+  left_motor_2->Set(ControlMode::PercentOutput, left_final_speed);
 
-  r1->Set(ControlMode::PercentOutput, -rFinalSpeed);
-  r2->Set(ControlMode::PercentOutput, -rFinalSpeed);
+  right_motor_1->Set(ControlMode::PercentOutput, -right_final_speed);
+  right_motor_2->Set(ControlMode::PercentOutput, -right_final_speed);
 }
 
 void Robot::RotateToAngle(double targetAngle, double currentAngle){ //angle is -180 to 180
@@ -72,35 +72,35 @@ void Robot::RotateToAngle(double targetAngle, double currentAngle){ //angle is -
   // https://pdocs.kauailabs.com/navx-mxp/examples/rotate-to-angle-2/
   
   bool rotateToAngle = false;
-  if ( js1->GetRawButton(2)) {
-    turnController->SetSetpoint(0.0f);
+  if ( joystick_1->GetRawButton(2)) {
+    turn_controller->SetSetpoint(0.0f);
     rotateToAngle = true;
   } 
-  else if ( js1->GetRawButton(3)) {
-    turnController->SetSetpoint(90.0f);
+  else if ( joystick_1->GetRawButton(3)) {
+    turn_controller->SetSetpoint(90.0f);
     rotateToAngle = true;
   }
-  else if ( js1->GetRawButton(4)) {
-    turnController->SetSetpoint(179.9f);
+  else if ( joystick_1->GetRawButton(4)) {
+    turn_controller->SetSetpoint(179.9f);
     rotateToAngle = true;
   } 
-  else if ( js1->GetRawButton(5)) {
-    turnController->SetSetpoint(-90.0f);
+  else if ( joystick_1->GetRawButton(5)) {
+    turn_controller->SetSetpoint(-90.0f);
     rotateToAngle = true;
   }
 
   double currentRotationRate;
   if ( rotateToAngle ) {
-    turnController->Enable();
-    currentRotationRate = rotateToAngleRate;
+    turn_controller->Enable();
+    currentRotationRate = rotate_to_angle_rate;
   } 
   else {
-    turnController->Disable();
-    currentRotationRate = js1->GetTwist();
+    turn_controller->Disable();
+    currentRotationRate = joystick_1->GetTwist();
   }
 
   // Rotate to angle using TankDrive function.
-  DreadbotTankDrive(-js1->GetRawAxis(y_axis), currentRotationRate);
+  DreadbotTankDrive(-joystick_1->GetRawAxis(y_axis), currentRotationRate);
 }
 
 void Robot::RobotPeriodic() {}
@@ -129,17 +129,17 @@ void Robot::AutonomousPeriodic() {
 void Robot::TeleopInit() {}
 
 void Robot::TeleopPeriodic() {
-  DreadbotTankDrive(-js1->GetRawAxis(y_axis), -js1->GetRawAxis(x_axis));
+  DreadbotTankDrive(-joystick_1->GetRawAxis(y_axis), -joystick_1->GetRawAxis(x_axis));
 
   // Check buttons to rotate to angle.
   // Inherently Overrides DreadBotTankDrive function.
-  if(js1->GetRawButton(a_button)) {
+  if(joystick_1->GetRawButton(a_button)) {
     RotateToAngle(0.0, ahrs->GetAngle());
-  } else if(js1->GetRawButton(b_button)) {
+  } else if(joystick_1->GetRawButton(b_button)) {
     RotateToAngle(90.0, ahrs->GetAngle());
-  } else if(js1->GetRawButton(y_button)) {
+  } else if(joystick_1->GetRawButton(y_button)) {
     RotateToAngle(180.0, ahrs->GetAngle());
-  } else if(js1->GetRawButton(x_button)) {
+  } else if(joystick_1->GetRawButton(x_button)) {
     RotateToAngle(-90.0, ahrs->GetAngle());
   }
 }
