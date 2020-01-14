@@ -57,14 +57,23 @@ private:
   const double kSpeed = 0.4;
 
   // PID CONSTANTS
-  const double kP = 0.03f;
-  const double kI = 0.00f;
-  const double kD = 0.00f;
-  const double kF = 0.00f;
-  const double kToleranceDegrees = 2.0f;
+  const double kP = 0.06;
+  const double kI = 0.00;
+  const double kD = 0.00;
+  const double kF = 0.00;
+
+  const double kPIDPeriod = 0.05;
+
+  const double kToleranceDegrees = 2.0;
+
+  const double kMinInputRange = -180.0;
+  const double kMaxInputRange = 180.0;
 
   // PID VARIABLES
   double rotate_to_angle_rate = 0.0;
+  double current_rotation_rate = 0.0;
+
+  bool rotate_to_angle = false;
 
   // JOYSTICK INPUT OBJECTS
   frc::Joystick *joystick_1;
