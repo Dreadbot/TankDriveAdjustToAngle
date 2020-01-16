@@ -18,11 +18,13 @@
 #include <ctre/Phoenix.h>
 
 #include <frc/Joystick.h>
-#include <frc/PIDController.h>
+#include <frc/controller/PIDController.h>
 #include <frc/PIDOutput.h>
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/smartdashboard/SendableChooser.h>
 #include <frc/TimedRobot.h>
+
+#include <frc/WPILib.h>
 
 #include "RobotUtilities.h"
 
@@ -43,7 +45,7 @@ public:
   }
 
   void RotateToAngle(double target_angle, double current_angle);
-  void DreadbotTankDrive(double y_axis, double rot_axis);
+  void DreadbotTankDrive(double y_axis, double rot_axis, bool checkForDeadband);
 
 private:
   // SMARTDASHBOARD VARIABLES/CONSTANTS
@@ -57,12 +59,12 @@ private:
   const double kSpeed = 0.4;
 
   // PID CONSTANTS
-  const double kP = 0.06;
-  const double kI = 0.00;
-  const double kD = 0.00;
-  const double kF = 0.00;
+  double kP = 0.1;
+  double kI = 0.00;
+  double kD = 0.00;
+  double kF = 0.00;
 
-  const double kPIDPeriod = 0.05;
+  const double kPIDPeriod = 20.0;
 
   const double kToleranceDegrees = 2.0;
 
@@ -72,6 +74,8 @@ private:
   // PID VARIABLES
   double rotate_to_angle_rate = 0.0;
   double current_rotation_rate = 0.0;
+
+  double error = 0.0;
 
   bool rotate_to_angle = false;
 
@@ -91,7 +95,7 @@ private:
   double const kCardinalDegrees[4] = {0.0, 90.0, 179.9, -90.0};
 
   // PID OBJECTS
-  frc::PIDController *turn_controller;
+  frc2::PIDController *turn_controller;
   
   // TANK DRIVE VARIABLES
   double y_speed;
