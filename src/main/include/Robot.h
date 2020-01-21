@@ -75,6 +75,8 @@ private:
   double rotate_to_angle_rate = 0.0;
   double current_rotation_rate = 0.0;
 
+  int timeToAdjust = 500;
+
   double error = 0.0;
 
   bool rotate_to_angle = false;
@@ -91,8 +93,12 @@ private:
 
   // ROBOT GYRO OBJECTS/VARIABLES
   AHRS *ahrs;
+  int BUTTON_TIMEOUT = 0;
+  double slop = 3;
+  bool turnComplete = false;
+  double selectedAngle = 0;
 
-  double const kCardinalDegrees[4] = {0.0, 90.0, 179.9, -90.0};
+  double const kCardinalDegrees[4] = {-90.0, 90.0, 179.9, 0.0};
 
   // PID OBJECTS
   frc2::PIDController *turn_controller;

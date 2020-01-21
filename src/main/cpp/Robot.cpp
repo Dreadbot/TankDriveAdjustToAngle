@@ -25,6 +25,7 @@ void Robot::RobotInit() {
 
   // Robot Gyroscope Objects
   ahrs = new AHRS(SPI::Port::kMXP);
+  ahrs->ZeroYaw();
 
   // PID Controller Object Setup
   turn_controller = new frc2::PIDController(kP, kI, kD);
@@ -55,7 +56,21 @@ void Robot::DreadbotTankDrive(double yAxis, double rotAxis, bool checkForDeadban
   left_final_speed = y_speed + -rot_speed;
   right_final_speed = y_speed + rot_speed;
 
+  if(left_final_speed > 1){
+    left_final_speed = 1;
+  }
+  if(left_final_speed < -1){
+    left_final_speed = -1;
+  }
+  if(right_final_speed > 1){
+    right_final_speed = 1;
+  }
+  if(right_final_speed < -1){
+    right_final_speed = -1;
+  }
+
   // Set Motor Values
+  std::cout << "left_final_speed: " << left_final_speed << " right_final_speed: " << right_final_speed << std::endl;
   left_motor_1->Set(ControlMode::PercentOutput, left_final_speed);
   left_motor_2->Set(ControlMode::PercentOutput, left_final_speed);
 
@@ -64,22 +79,28 @@ void Robot::DreadbotTankDrive(double yAxis, double rotAxis, bool checkForDeadban
 }
 
 void Robot::RotateToAngle(double targetAngle, double currentAngle){ //angle is -180 to 180
-  // Code by KauaiLabs for Angle Rotation using Gyro.
-  // https://pdocs.kauailabs.com/navx-mxp/examples/rotate-to-angle-2/
   
   // turn_controller->SetSetpoint(targetAngle);
-
   // turn_controller->Enable();
   // current_rotation_rate = rotate_to_angle_rate;
-  
-  // ------------------------------------------
+
   error = currentAngle - targetAngle;
-  current_rotation_rate = error * kP;
+  current_rotation_rate = error * error * kP;
+  if(error < 0){
+    current_rotation_rate * -1;
+  }
+  
+  if (fabs(error) < slop && BUTTON_TIMEOUT > timeToAdjust){
+    turnComplete = true;
+    std::cout << "turn complete" << std::endl;
+    ahrs->ZeroYaw();
+  }
 
   frc::SmartDashboard::PutNumber("rotation_rate", current_rotation_rate);
-
+  std::cout << "current_rotation rate: " << current_rotation_rate << std::endl;
   // Rotate to angle using TankDrive function.
   DreadbotTankDrive(-joystick_1->GetRawAxis(y_axis), current_rotation_rate, false);
+   
 }
 
 void Robot::RobotPeriodic() {}
@@ -105,7 +126,10 @@ void Robot::AutonomousPeriodic() {
   }
 }
 
-void Robot::TeleopInit() {}
+void Robot::TeleopInit() {
+  double selectedAngle;
+  ahrs->ZeroYaw();
+}
 
 void Robot::TeleopPeriodic() {
   frc::SmartDashboard::PutNumber("Current Angle", ahrs->GetAngle());
@@ -123,15 +147,34 @@ void Robot::TeleopPeriodic() {
 
   // Check buttons to rotate to angle.
   // Inherently Overrides DreadBotTankDrive function.
-  if(joystick_1->GetRawButton(a_button)) {
-    RotateToAngle(kCardinalDegrees[0], ahrs->GetAngle());
-  } else if(joystick_1->GetRawButton(b_button)) {
-    RotateToAngle(kCardinalDegrees[1], ahrs->GetAngle());
-  } else if(joystick_1->GetRawButton(y_button)) {
-    RotateToAngle(kCardinalDegrees[2], ahrs->GetAngle());
-  } else if(joystick_1->GetRawButton(x_button)) {
-    RotateToAngle(kCardinalDegrees[3], ahrs->GetAngle());
+  if(BUTTON_TIMEOUT >= timeToAdjust && turnComplete == true){
+    turnComplete = false;
   }
+
+  if(joystick_1->GetRawButton(x_button)){
+    std::cout << "x button pressed" << std::endl;
+    BUTTON_TIMEOUT = 0;
+    selectedAngle = kCardinalDegrees[0]; 
+  }
+  else if(joystick_1->GetRawButton(b_button)){
+    BUTTON_TIMEOUT = 0;
+    selectedAngle = kCardinalDegrees[1];
+  }
+  else if(joystick_1->GetRawButton(a_button)){
+    BUTTON_TIMEOUT = 0;
+    selectedAngle = kCardinalDegrees[2];
+  }
+  else if (joystick_1->GetRawButton(y_button)){
+    BUTTON_TIMEOUT = 0;
+    selectedAngle = kCardinalDegrees[3];
+  }
+  if (!turnComplete){
+    RotateToAngle(selectedAngle, ahrs->GetAngle()); 
+  }
+  if(BUTTON_TIMEOUT < timeToAdjust)
+    BUTTON_TIMEOUT++;
+  //std::cout << "error:" << error << std::endl;
+  //std::cout << "BUTTON_TIMEOUT: " << BUTTON_TIMEOUT << "Turn Complete: " << turnComplete << "selectedAngle: " << selectedAngle << "currentAngle: " << ahrs->GetAngle() << std::endl;
 }
 
 void Robot::TestPeriodic() {}
