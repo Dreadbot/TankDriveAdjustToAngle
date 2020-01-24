@@ -50,7 +50,8 @@ void Robot::DreadbotTankDrive(double yAxis, double rotAxis, bool checkForDeadban
   // (See main.include.Robot.h)
   y_speed = yAxis * kSpeed;
   rot_speed = rotAxis * kSpeed;
-
+  std::cout<<"yAxis: "<<yAxis<<" rotAxis: "<<rotAxis<<std::endl;
+  std::cout<<"y_speed: "<<y_speed<<" rot_speed: "<<rot_speed<<std::endl;
   // Calculating Final Speed
   // by Adding the Rotation Factor
   left_final_speed = y_speed + -rot_speed;
@@ -85,10 +86,16 @@ void Robot::RotateToAngle(double targetAngle, double currentAngle){ //angle is -
   // current_rotation_rate = rotate_to_angle_rate;
 
   error = currentAngle - targetAngle;
-  current_rotation_rate = error * error * kP;
-  if(error < 0){
-    current_rotation_rate * -1;
+  current_rotation_rate = (error * kP);
+  if(current_rotation_rate < 0){
+    current_rotation_rate -= minRotationRate;
   }
+  else if (current_rotation_rate > 0){
+    current_rotation_rate += minRotationRate;
+  }
+  // if(error < 0){
+  //   current_rotation_rate = current_rotation_rate * -1;
+  // }
   
   if (fabs(error) < slop && BUTTON_TIMEOUT > timeToAdjust){
     turnComplete = true;
@@ -127,7 +134,7 @@ void Robot::AutonomousPeriodic() {
 }
 
 void Robot::TeleopInit() {
-  double selectedAngle;
+  double selectedAngle = 0;
   ahrs->ZeroYaw();
 }
 
@@ -143,36 +150,37 @@ void Robot::TeleopPeriodic() {
   frc::SmartDashboard::PutNumber("P", turn_controller->GetP());
   frc::SmartDashboard::PutNumber("D", turn_controller->GetD());
   frc::SmartDashboard::PutNumber("rotate to angle rate", rotate_to_angle_rate);
+  std::cout<<"y joystick Axis: "<<-joystick_1->GetRawAxis(y_axis)<<" joystick x Axis: "<<-joystick_1->GetRawAxis(x_axis)<<std::endl;
   DreadbotTankDrive(-joystick_1->GetRawAxis(y_axis), -joystick_1->GetRawAxis(x_axis), true);
 
   // Check buttons to rotate to angle.
   // Inherently Overrides DreadBotTankDrive function.
-  if(BUTTON_TIMEOUT >= timeToAdjust && turnComplete == true){
-    turnComplete = false;
-  }
 
   if(joystick_1->GetRawButton(x_button)){
     std::cout << "x button pressed" << std::endl;
     BUTTON_TIMEOUT = 0;
+    turnComplete = false;
     selectedAngle = kCardinalDegrees[0]; 
   }
   else if(joystick_1->GetRawButton(b_button)){
     BUTTON_TIMEOUT = 0;
+    turnComplete = false;
     selectedAngle = kCardinalDegrees[1];
   }
   else if(joystick_1->GetRawButton(a_button)){
     BUTTON_TIMEOUT = 0;
+    turnComplete = false;
     selectedAngle = kCardinalDegrees[2];
   }
   else if (joystick_1->GetRawButton(y_button)){
     BUTTON_TIMEOUT = 0;
+    turnComplete = false;
     selectedAngle = kCardinalDegrees[3];
   }
   if (!turnComplete){
     RotateToAngle(selectedAngle, ahrs->GetAngle()); 
   }
-  if(BUTTON_TIMEOUT < timeToAdjust)
-    BUTTON_TIMEOUT++;
+  BUTTON_TIMEOUT++;
   //std::cout << "error:" << error << std::endl;
   //std::cout << "BUTTON_TIMEOUT: " << BUTTON_TIMEOUT << "Turn Complete: " << turnComplete << "selectedAngle: " << selectedAngle << "currentAngle: " << ahrs->GetAngle() << std::endl;
 }

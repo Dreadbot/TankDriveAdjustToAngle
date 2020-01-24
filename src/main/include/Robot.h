@@ -56,7 +56,7 @@ private:
 
   // TANK DRIVE CONSTANTS
   const double kJoystickDeadband = 0.2;
-  const double kSpeed = 0.4;
+  const double kSpeed = 1;
 
   // PID CONSTANTS
   double kP = 0.1;
@@ -75,7 +75,8 @@ private:
   double rotate_to_angle_rate = 0.0;
   double current_rotation_rate = 0.0;
 
-  int timeToAdjust = 500;
+  int timeToAdjust = 35;
+  double minRotationRate = 0.3;
 
   double error = 0.0;
 
@@ -94,11 +95,11 @@ private:
   // ROBOT GYRO OBJECTS/VARIABLES
   AHRS *ahrs;
   int BUTTON_TIMEOUT = 0;
-  double slop = 3;
+  double slop = 2;
   bool turnComplete = false;
   double selectedAngle = 0;
 
-  double const kCardinalDegrees[4] = {-90.0, 90.0, 179.9, 0.0};
+  double const kCardinalDegrees[4] = {-30.0, 30.0, 45, 0.0};
 
   // PID OBJECTS
   frc2::PIDController *turn_controller;
