@@ -75,8 +75,8 @@ private:
   double rotate_to_angle_rate = 0.0;
   double current_rotation_rate = 0.0;
 
-  int timeToAdjust = 35;
-  double minRotationRate = 0.3;
+  int timeToAdjust = 10;
+  double minRotationRate = 0.275;
 
   double error = 0.0;
 
@@ -96,7 +96,7 @@ private:
   AHRS *ahrs;
   int BUTTON_TIMEOUT = 0;
   double slop = 2;
-  bool turnComplete = false;
+  bool turnComplete = true;
   double selectedAngle = 0;
 
   double const kCardinalDegrees[4] = {-30.0, 30.0, 45, 0.0};

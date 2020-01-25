@@ -84,22 +84,27 @@ void Robot::RotateToAngle(double targetAngle, double currentAngle){ //angle is -
   // turn_controller->SetSetpoint(targetAngle);
   // turn_controller->Enable();
   // current_rotation_rate = rotate_to_angle_rate;
+  double localMinSpeed = minRotationRate;
+
+  if (fabs(error) < slop){
+    BUTTON_TIMEOUT++;
+    // localMinSpeed = 0.25;
+  }
 
   error = currentAngle - targetAngle;
   current_rotation_rate = (error * kP);
   if(current_rotation_rate < 0){
-    current_rotation_rate -= minRotationRate;
+    current_rotation_rate -= localMinSpeed;
   }
   else if (current_rotation_rate > 0){
-    current_rotation_rate += minRotationRate;
+    current_rotation_rate += localMinSpeed;
   }
   // if(error < 0){
   //   current_rotation_rate = current_rotation_rate * -1;
   // }
   
-  if (fabs(error) < slop && BUTTON_TIMEOUT > timeToAdjust){
+  if(fabs(error) < slop && BUTTON_TIMEOUT > timeToAdjust){
     turnComplete = true;
-    std::cout << "turn complete" << std::endl;
     ahrs->ZeroYaw();
   }
 
@@ -180,7 +185,6 @@ void Robot::TeleopPeriodic() {
   if (!turnComplete){
     RotateToAngle(selectedAngle, ahrs->GetAngle()); 
   }
-  BUTTON_TIMEOUT++;
   //std::cout << "error:" << error << std::endl;
   //std::cout << "BUTTON_TIMEOUT: " << BUTTON_TIMEOUT << "Turn Complete: " << turnComplete << "selectedAngle: " << selectedAngle << "currentAngle: " << ahrs->GetAngle() << std::endl;
 }
