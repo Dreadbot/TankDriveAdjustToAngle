@@ -17,11 +17,11 @@ void Robot::RobotInit() {
   joystick_1 = new frc::Joystick(0);
 
   // Robot Motor Objects
-  left_motor_1 = new rev::CANSparkMax(1, rev::CANSparkMax::MotorType::kBrushless);
-  left_motor_2 = new rev::CANSparkMax(10, rev::CANSparkMax::MotorType::kBrushless);
+  left_motor_1 = new rev::CANSparkMax(10, rev::CANSparkMax::MotorType::kBrushless);
+  left_motor_2 = new rev::CANSparkMax(2, rev::CANSparkMax::MotorType::kBrushless);
 
-  right_motor_1 = new rev::CANSparkMax(3, rev::CANSparkMax::MotorType::kBrushless);
-  right_motor_2 = new rev::CANSparkMax(2, rev::CANSparkMax::MotorType::kBrushless);
+  right_motor_1 = new rev::CANSparkMax(1, rev::CANSparkMax::MotorType::kBrushless);
+  right_motor_2 = new rev::CANSparkMax(3, rev::CANSparkMax::MotorType::kBrushless);
 
   // Robot Gyroscope Objects
   ahrs = new AHRS(SPI::Port::kMXP);
@@ -111,8 +111,7 @@ void Robot::RotateToAngle(double targetAngle, double currentAngle){ //angle is -
   frc::SmartDashboard::PutNumber("rotation_rate", current_rotation_rate);
   std::cout << "current_rotation rate: " << current_rotation_rate << std::endl;
   // Rotate to angle using TankDrive function.
-  DreadbotTankDrive(-joystick_1->GetRawAxis(y_axis), current_rotation_rate, false);
-   
+  DreadbotTankDrive(joystick_1->GetRawAxis(y_axis), current_rotation_rate, false);
 }
 
 void Robot::RobotPeriodic() {}
@@ -156,7 +155,7 @@ void Robot::TeleopPeriodic() {
   frc::SmartDashboard::PutNumber("D", turn_controller->GetD());
   frc::SmartDashboard::PutNumber("rotate to angle rate", rotate_to_angle_rate);
   std::cout<<"y joystick Axis: "<<-joystick_1->GetRawAxis(y_axis)<<" joystick x Axis: "<<-joystick_1->GetRawAxis(x_axis)<<std::endl;
-  DreadbotTankDrive(-joystick_1->GetRawAxis(y_axis), -joystick_1->GetRawAxis(x_axis), true);
+  DreadbotTankDrive(joystick_1->GetRawAxis(y_axis), -joystick_1->GetRawAxis(x_axis), true);
 
   // Check buttons to rotate to angle.
   // Inherently Overrides DreadBotTankDrive function.
