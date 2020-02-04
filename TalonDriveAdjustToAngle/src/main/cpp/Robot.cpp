@@ -36,39 +36,26 @@ void Robot::RobotInit() {
   frc::SmartDashboard::PutNumber("D value", kD);
 }
 
-void Robot::DreadbotTankDrive(double yAxis, double rotAxis, bool checkForDeadband) {
+void Robot::DreadbotTankDrive(double yAxis, double rotationAxis, bool checkForDeadband) {
   // Account for Joystick Deadband
   if(checkForDeadband) {
     yAxis = (fabs(yAxis) < kJoystickDeadband) ? 0 : yAxis;
-    rotAxis = (fabs(rotAxis) < kJoystickDeadband) ? 0 : rotAxis;
+    rotationAxis = (fabs(rotationAxis) < kJoystickDeadband) ? 0 : rotationAxis;
   }
 
   // Flipping Variables to change behavior for rotation influence.
-  rot_speed = (fabs(rotAxis) > 0.0) ? -rot_speed : rot_speed;
+  rot_speed = (fabs(rotationAxis) > 0.0) ? -rot_speed : rot_speed;
 
   // Multiply Intended Velocity by a cap speed.
   // (See main.include.Robot.h)
   y_speed = yAxis * kSpeed;
-  rot_speed = rotAxis * kSpeed;
-  std::cout<<"yAxis: "<<yAxis<<" rotAxis: "<<rotAxis<<std::endl;
+  rot_speed = rotationAxis * kSpeed;
+  std::cout<<"yAxis: "<<yAxis<<" rotAxis: "<<rotationAxis<<std::endl;
   std::cout<<"y_speed: "<<y_speed<<" rot_speed: "<<rot_speed<<std::endl;
   // Calculating Final Speed
   // by Adding the Rotation Factor
-  left_final_speed = y_speed + -rot_speed;
-  right_final_speed = y_speed + rot_speed;
-
-  if(left_final_speed > 1){
-    left_final_speed = 1;
-  }
-  if(left_final_speed < -1){
-    left_final_speed = -1;
-  }
-  if(right_final_speed > 1){
-    right_final_speed = 1;
-  }
-  if(right_final_speed < -1){
-    right_final_speed = -1;
-  }
+  left_final_speed = scaleSpeed(y_speed -rot_speed);
+  right_final_speed = scaleSpeed(y_speed + rot_speed);
 
   // Set Motor Values
   std::cout << "left_final_speed: " << left_final_speed << " right_final_speed: " << right_final_speed << std::endl;
@@ -79,20 +66,29 @@ void Robot::DreadbotTankDrive(double yAxis, double rotAxis, bool checkForDeadban
   right_motor_2->Set(ControlMode::PercentOutput, -right_final_speed);
 }
 
+int Robot::scaleSpeed(int speed) {
+  if (speed > 1|| speed < -1) {
+    return speed / abs(speed);
+  }
+}
+
 void Robot::RotateToAngle(double targetAngle, double currentAngle){ //angle is -180 to 180
   
   // turn_controller->SetSetpoint(targetAngle);
   // turn_controller->Enable();
   // current_rotation_rate = rotate_to_angle_rate;
   double localMinSpeed = minRotationRate;
-
+  double error = currentAngle - targetAngle;
+  
+  // If we are close, then start the timer so it stops
   if (fabs(error) < slop){
     BUTTON_TIMEOUT++;
     // localMinSpeed = 0.25;
   }
 
-  error = currentAngle - targetAngle;
+  //current_rotation_rate = turn_controller->Calculate(error);
   current_rotation_rate = (error * kP);
+  // add min speed, so it always have enough power to turn
   if(current_rotation_rate < 0){
     current_rotation_rate -= localMinSpeed;
   }
@@ -103,6 +99,8 @@ void Robot::RotateToAngle(double targetAngle, double currentAngle){ //angle is -
   //   current_rotation_rate = current_rotation_rate * -1;
   // }
   
+  // continue adjusting until we are really close and it has
+  // been adjusting for timeToAdjust iterations
   if(fabs(error) < slop && BUTTON_TIMEOUT > timeToAdjust){
     turnComplete = true;
     ahrs->ZeroYaw();
@@ -111,8 +109,7 @@ void Robot::RotateToAngle(double targetAngle, double currentAngle){ //angle is -
   frc::SmartDashboard::PutNumber("rotation_rate", current_rotation_rate);
   std::cout << "current_rotation rate: " << current_rotation_rate << std::endl;
   // Rotate to angle using TankDrive function.
-  DreadbotTankDrive(-joystick_1->GetRawAxis(y_axis), current_rotation_rate, false);
-   
+  DreadbotTankDrive(-joystick_1->GetRawAxis(y_axis), current_rotation_rate, false);   
 }
 
 void Robot::RobotPeriodic() {}
@@ -156,6 +153,7 @@ void Robot::TeleopPeriodic() {
   frc::SmartDashboard::PutNumber("D", turn_controller->GetD());
   frc::SmartDashboard::PutNumber("rotate to angle rate", rotate_to_angle_rate);
   std::cout<<"y joystick Axis: "<<-joystick_1->GetRawAxis(y_axis)<<" joystick x Axis: "<<-joystick_1->GetRawAxis(x_axis)<<std::endl;
+  
   DreadbotTankDrive(-joystick_1->GetRawAxis(y_axis), -joystick_1->GetRawAxis(x_axis), true);
 
   // Check buttons to rotate to angle.

@@ -46,6 +46,7 @@ public:
 
   void RotateToAngle(double target_angle, double current_angle);
   void DreadbotTankDrive(double y_axis, double rot_axis, bool checkForDeadband);
+  int scaleSpeed(int speed);
 
 private:
   // SMARTDASHBOARD VARIABLES/CONSTANTS
